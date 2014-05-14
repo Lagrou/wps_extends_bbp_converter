@@ -1,0 +1,484 @@
+string(50) "SELECT * FROM wp_symposium_cats ORDER BY listorder"
+array(3) {
+  [0]=>
+  object(stdClass)#5932 (12) {
+    ["cid"]=>
+    string(1) "1"
+    ["title"]=>
+    string(14) "General Topics"
+    ["listorder"]=>
+    string(1) "1"
+    ["allow_new"]=>
+    string(2) "on"
+    ["defaultcat"]=>
+    string(2) "on"
+    ["cat_parent"]=>
+    string(1) "0"
+    ["cat_desc"]=>
+    string(0) ""
+    ["level"]=>
+    string(68) "s:60:"everyone,Administrator,Editor,Author,Contributor,Subscriber,";"
+    ["stub"]=>
+    string(0) ""
+    ["min_rank"]=>
+    string(1) "0"
+    ["hide_breadcrumbs"]=>
+    string(0) ""
+    ["hide_main"]=>
+    string(0) ""
+  }
+  [1]=>
+  object(stdClass)#5936 (12) {
+    ["cid"]=>
+    string(1) "2"
+    ["title"]=>
+    string(14) "Support Issues"
+    ["listorder"]=>
+    string(1) "2"
+    ["allow_new"]=>
+    string(2) "on"
+    ["defaultcat"]=>
+    string(0) ""
+    ["cat_parent"]=>
+    string(1) "0"
+    ["cat_desc"]=>
+    string(0) ""
+    ["level"]=>
+    string(68) "s:60:"everyone,Administrator,Editor,Author,Contributor,Subscriber,";"
+    ["stub"]=>
+    string(0) ""
+    ["min_rank"]=>
+    string(1) "0"
+    ["hide_breadcrumbs"]=>
+    string(0) ""
+    ["hide_main"]=>
+    string(0) ""
+  }
+  [2]=>
+  object(stdClass)#5938 (12) {
+    ["cid"]=>
+    string(1) "3"
+    ["title"]=>
+    string(8) "Feedback"
+    ["listorder"]=>
+    string(1) "3"
+    ["allow_new"]=>
+    string(2) "on"
+    ["defaultcat"]=>
+    string(0) ""
+    ["cat_parent"]=>
+    string(1) "1"
+    ["cat_desc"]=>
+    string(0) ""
+    ["level"]=>
+    string(68) "s:60:"everyone,Administrator,Editor,Author,Contributor,Subscriber,";"
+    ["stub"]=>
+    string(0) ""
+    ["min_rank"]=>
+    string(1) "0"
+    ["hide_breadcrumbs"]=>
+    string(0) ""
+    ["hide_main"]=>
+    string(0) ""
+  }
+}
+string(33) "SELECT * FROM wp_symposium_topics"
+array(9) {
+  [0]=>
+  object(stdClass)#5939 (18) {
+    ["tid"]=>
+    string(1) "1"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "1"
+    ["topic_subject"]=>
+    string(20) "Welcome to the Forum"
+    ["topic_post"]=>
+    string(71) "Welcome to the forum - this is a demonstration post and can be deleted."
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_parent"]=>
+    string(1) "0"
+    ["topic_views"]=>
+    string(1) "1"
+    ["topic_started"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(0) ""
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [1]=>
+  object(stdClass)#5940 (18) {
+    ["tid"]=>
+    string(1) "2"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "1"
+    ["topic_subject"]=>
+    string(0) ""
+    ["topic_post"]=>
+    string(30) "This is a demonstration reply."
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_parent"]=>
+    string(1) "1"
+    ["topic_views"]=>
+    string(1) "0"
+    ["topic_started"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(0) ""
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [2]=>
+  object(stdClass)#5941 (18) {
+    ["tid"]=>
+    string(1) "3"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "1"
+    ["topic_subject"]=>
+    string(0) ""
+    ["topic_post"]=>
+    string(36) "This is another demonstration reply."
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_parent"]=>
+    string(1) "1"
+    ["topic_views"]=>
+    string(1) "0"
+    ["topic_started"]=>
+    string(19) "2014-05-13 15:26:42"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(0) ""
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [3]=>
+  object(stdClass)#5942 (18) {
+    ["tid"]=>
+    string(1) "4"
+    ["topic_group"]=>
+    string(1) "1"
+    ["topic_category"]=>
+    string(1) "0"
+    ["topic_subject"]=>
+    string(11) "Group topic"
+    ["topic_post"]=>
+    string(97) "A topic created in the group forum - it may be private to group members if chosen in its settings"
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:57:20"
+    ["topic_parent"]=>
+    string(1) "0"
+    ["topic_views"]=>
+    string(1) "2"
+    ["topic_started"]=>
+    string(19) "2014-05-14 04:44:07"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(11) "group-topic"
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [4]=>
+  object(stdClass)#5943 (18) {
+    ["tid"]=>
+    string(1) "5"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "2"
+    ["topic_subject"]=>
+    string(23) "Topic in Support Issues"
+    ["topic_post"]=>
+    string(65) "This is a topic created in the second default category (subforum)"
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:55:09"
+    ["topic_parent"]=>
+    string(1) "0"
+    ["topic_views"]=>
+    string(1) "2"
+    ["topic_started"]=>
+    string(19) "2014-05-14 07:54:37"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(23) "topic-in-support-issues"
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [5]=>
+  object(stdClass)#5934 (18) {
+    ["tid"]=>
+    string(1) "6"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "2"
+    ["topic_subject"]=>
+    string(0) ""
+    ["topic_post"]=>
+    string(39) "This is a reply to \"Topic in Support\""
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:55:09"
+    ["topic_parent"]=>
+    string(1) "5"
+    ["topic_views"]=>
+    string(1) "0"
+    ["topic_started"]=>
+    string(19) "2014-05-14 07:55:09"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [6]=>
+  object(stdClass)#5930 (18) {
+    ["tid"]=>
+    string(1) "7"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "3"
+    ["topic_subject"]=>
+    string(17) "Topic in Feedback"
+    ["topic_post"]=>
+    string(47) "The third category \"Feedback\" now has a topic"
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:56:19"
+    ["topic_parent"]=>
+    string(1) "0"
+    ["topic_views"]=>
+    string(1) "3"
+    ["topic_started"]=>
+    string(19) "2014-05-14 07:55:48"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(17) "topic-in-feedback"
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [7]=>
+  object(stdClass)#5935 (18) {
+    ["tid"]=>
+    string(1) "8"
+    ["topic_group"]=>
+    string(1) "0"
+    ["topic_category"]=>
+    string(1) "3"
+    ["topic_subject"]=>
+    string(0) ""
+    ["topic_post"]=>
+    string(51) "Feedback &gt; topic, and this topic now has a reply"
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:56:19"
+    ["topic_parent"]=>
+    string(1) "7"
+    ["topic_views"]=>
+    string(1) "0"
+    ["topic_started"]=>
+    string(19) "2014-05-14 07:56:19"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+  [8]=>
+  object(stdClass)#5945 (18) {
+    ["tid"]=>
+    string(1) "9"
+    ["topic_group"]=>
+    string(1) "1"
+    ["topic_category"]=>
+    string(1) "0"
+    ["topic_subject"]=>
+    string(0) ""
+    ["topic_post"]=>
+    string(52) "A reply to the topic created in the Test Group forum"
+    ["topic_owner"]=>
+    string(1) "1"
+    ["topic_date"]=>
+    string(19) "2014-05-14 07:57:20"
+    ["topic_parent"]=>
+    string(1) "4"
+    ["topic_views"]=>
+    string(1) "0"
+    ["topic_started"]=>
+    string(19) "2014-05-14 07:57:20"
+    ["topic_sticky"]=>
+    string(1) "0"
+    ["allow_replies"]=>
+    string(2) "on"
+    ["topic_approved"]=>
+    string(2) "on"
+    ["topic_answer"]=>
+    string(0) ""
+    ["for_info"]=>
+    string(0) ""
+    ["stub"]=>
+    string(0) ""
+    ["remote_addr"]=>
+    string(13) "IP.IP.IP.IP"
+    ["http_x_forwarded_for"]=>
+    string(0) ""
+  }
+}
+string(33) "SELECT * FROM wp_symposium_groups"
+array(1) {
+  [0]=>
+  object(stdClass)#5946 (20) {
+    ["gid"]=>
+    string(1) "1"
+    ["name"]=>
+    string(10) "Test Group"
+    ["description"]=>
+    string(51) "A group created for the sake of creating a group..."
+    ["last_activity"]=>
+    string(19) "2014-05-14 07:57:21"
+    ["private"]=>
+    string(0) ""
+    ["created"]=>
+    string(19) "2014-05-14 04:41:57"
+    ["forum"]=>
+    string(0) ""
+    ["photos"]=>
+    string(0) ""
+    ["wall"]=>
+    string(2) "on"
+    ["content_private"]=>
+    string(2) "on"
+    ["group_avatar"]=>
+    string(0) ""
+    ["profile_photo"]=>
+    string(0) ""
+    ["group_forum"]=>
+    string(2) "on"
+    ["allow_new_topics"]=>
+    string(2) "on"
+    ["new_member_emails"]=>
+    string(2) "on"
+    ["add_alerts"]=>
+    string(0) ""
+    ["default_page"]=>
+    string(8) "activity"
+    ["about_page"]=>
+    NULL
+    ["max_members"]=>
+    string(1) "0"
+    ["group_order"]=>
+    string(2) "99"
+  }
+}
