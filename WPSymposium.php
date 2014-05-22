@@ -65,6 +65,15 @@ class WPSymposium extends BBP_Converter_Base {
 			'to_fieldname'    => 'post_content',
 		);
 
+		// Forum status (Open or Closed)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_cats',
+			'from_fieldname'  => 'allow_new',
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'forum_status',
+			'callback_method' => 'callback_forum_status'
+		);
+
 		// Forum display order (Starts from 1)
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_cats',
@@ -321,6 +330,80 @@ class WPSymposium extends BBP_Converter_Base {
 			'to_fieldname'    => 'post_modified_gmt',
 			'callback_method' => 'callback_datetime'
 		);
+		
+		/** User Section ******************************************************/
+
+		// Store old User id (Stored in usermeta)
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'ID',
+			'to_type'        => 'user',
+			'to_fieldname'   => '_bbp_user_id'
+		);
+
+		// Store old User password (Stored in usermeta)
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_pass',
+			'to_type'        => 'user',
+			'to_fieldname'   => '_bbp_password'
+		);
+
+		// User name.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_login',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_login'
+		);
+
+		// User nice name.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_nicename',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_nicename'
+		);
+
+		// User email.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_email',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_email'
+		);
+
+		// User homepage.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_url',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_url'
+		);
+
+		// User registered.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_registered',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_registered'
+		);
+
+		// User status.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'user_status',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'user_status'
+		);
+
+		// User display name.
+		$this->field_map[] = array(
+			'from_tablename' => 'users',
+			'from_fieldname' => 'display_name',
+			'to_type'        => 'user',
+			'to_fieldname'   => 'display_name'
+		);		
 	}
 
 	/**
@@ -351,71 +434,48 @@ class WPSymposium extends BBP_Converter_Base {
 	}
 
 	/**
-	 * Translate the forum type from WP Symposium numeric's to WordPress's strings.
+	 * Translate the forum status from WP Symposium strings to bbPress strings.
 	 *
-	 * @param int $status WP Symposium numeric forum type
+	 * @param string $status WP Symposium string forum status, 'on' or ''
 	 * @return string WordPress safe
 	 *
-	 * This can be included when more info on how WP Symposium handles forum types
-	public function callback_forum_type( $status = 1 ) {
-		switch ( $status ) {
-			case 0 :
-				$status = 'category';
-				break;
-
-			case 1  :
-			default :
-				$status = 'forum';
-				break;
-		}
-		return $status;
-	}
-	*/
-
-	/**
-	 * Translate the forum status from WP Symposium numeric's to WordPress's strings.
-	 *
-	 * @param int $status WP Symposium numeric forum status
-	 * @return string WordPress safe
-	 *
-	 * This can be included when more info on how WP Symposium handles forum status
-	public function callback_forum_status( $status = 0 ) {
-		switch ( $status ) {
-			case 1 :
-				$status = 'closed';
-				break;
-
-			case 0  :
-			default :
-				$status = 'open';
-				break;
-		}
-		return $status;
-	}
-	*/
-
-	/**
-	 * Translate the topic status from WP Symposium strings to WordPress's strings.
-	 *
-	 * @param $status WP Symposium string topic status
-	 * @return string WordPress safe
 	 */
-	public function callback_topic_status( $status = 0 ) {
+	public function callback_forum_status( $status = 'on' ) {
 		switch ( $status ) {
 			case '' :
-				$status = 'closed';       // WP Symposium closed topic "allow_replies = ''"
+				$status = 'closed';			// WP Symposium closed forum "allow_new = ''"
 				break;
 
-			case 'on'  :
+			case 'on' :
 			default :
-				$status = 'publish';       // WP Symposium Normal Topic "allow_replies = 'on'"
+				$status = 'open';			// WP Symposium forum open to new topics "allow_new = 'on'"
+				break;
+		}
+		return $status;
+	}
+	
+	/**
+	 * Translate the topic status from WP Symposium strings to bbPress strings.
+	 *
+	 * @param string $status WP Symposium string topic status, 'on' or ''
+	 * @return string WordPress safe
+	 */
+	public function callback_topic_status( $status = 'on' ) {
+		switch ( $status ) {
+			case '' :
+				$status = 'closed';			// WP Symposium closed topic "allow_replies = ''"
+				break;
+
+			case 'on' :
+			default :
+				$status = 'publish';		// WP Symposium Normal Topic "allow_replies = 'on'"
 				break;
 		}
 		return $status;
 	}
 
 	/**
-	 * Translate the topic sticky status type from WP Symposium numeric's to WordPress's strings.
+	 * Translate the topic sticky status type from WP Symposium numeric's to bbPress strings.
 	 *
 	 * @param int $status WP Symposium numeric forum type
 	 * @return string WordPress safe
@@ -434,3 +494,5 @@ class WPSymposium extends BBP_Converter_Base {
 		return $status;
 	}
 }
+
+?>
