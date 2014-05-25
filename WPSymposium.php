@@ -110,7 +110,7 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'from_expression' => 'WHERE symposium_topics.topic_parent = 0',
+			'from_expression' => 'WHERE symposium_topics.topic_parent = 0 AND symposium_topics.topic_group = 0',
 			'to_type'         => 'topic',
 			'to_fieldname'    => '_bbp_topic_id'
 		);
@@ -229,7 +229,7 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'from_expression' => 'WHERE symposium_topics.topic_parent != 0',
+			'from_expression' => 'INNER JOIN wp_symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
 			'to_type'         => 'reply',
 			'to_fieldname'    => '_bbp_post_id'
 		);
