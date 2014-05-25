@@ -497,8 +497,23 @@ class BBP_Converter {
 
 				break;
 
-			// STEP 11. Convert reply_to parents.
+			// STEP 11. Convert comments.
 			case 11 :
+				if ( $converter->convert_comments( $start ) ) {
+					update_option( '_bbp_converter_step',  $step + 1 );
+					update_option( '_bbp_converter_start', 0         );
+					if ( empty( $start ) ) {
+						$this->converter_output( __( 'No comments to convert', 'bbpress' ) );
+					}
+				} else {
+					update_option( '_bbp_converter_start', $max + 1 );
+					$this->converter_output( sprintf( __( 'Converting comments (%1$s - %2$s)', 'bbpress' ), $min, $max ) );
+				}
+
+				break;
+
+			// STEP 12. Convert reply_to parents.
+			case 12 :
 				if ( $converter->convert_reply_to_parents( $start ) ) {
 					update_option( '_bbp_converter_step',  $step + 1 );
 					update_option( '_bbp_converter_start', 0         );
@@ -722,7 +737,7 @@ abstract class BBP_Converter_Base {
 			'default'      => 'topic'
 		);
 
-		/** Post Section ******************************************************/
+		/** Reply Section *****************************************************/
 
 		$this->field_map[] = array(
 			'to_type'      => 'reply',
@@ -741,6 +756,29 @@ abstract class BBP_Converter_Base {
 		);
 		$this->field_map[] = array(
 			'to_type'      => 'reply',
+			'to_fieldname' => 'post_type',
+			'default'      => 'reply'
+		);
+
+		/** Comment Section ***************************************************/
+
+		$this->field_map[] = array(
+			'to_type'      => 'comment',
+			'to_fieldname' => 'post_status',
+			'default'      => 'publish'
+		);
+		$this->field_map[] = array(
+			'to_type'      => 'comment',
+			'to_fieldname' => 'comment_status',
+			'default'      => 'closed'
+		);
+		$this->field_map[] = array(
+			'to_type'      => 'comment',
+			'to_fieldname' => 'ping_status',
+			'default'      => 'closed'
+		);
+		$this->field_map[] = array(
+			'to_type'      => 'comment',
 			'to_fieldname' => 'post_type',
 			'default'      => 'reply'
 		);
@@ -769,10 +807,17 @@ abstract class BBP_Converter_Base {
 	}
 
 	/**
-	 * Convert Posts
+	 * Convert Reples / Posts
 	 */
 	public function convert_replies( $start = 1 ) {
 		return $this->convert_table( 'reply', $start );
+	}
+
+	/**
+	 * Convert Comments
+	 */
+	public function convert_comments( $start = 1 ) {
+		return $this->convert_table( 'comment', $start );
 	}
 
 	/**
@@ -893,7 +938,7 @@ abstract class BBP_Converter_Base {
 					// Loop through field map, again...
 					foreach ( $this->field_map as $row ) {
 
-						// Types matchand to_fieldname is present. This means
+						// Types match and to_fieldname is present. This means
 						// we have some work to do here.
 						if ( ( $row['to_type'] == $to_type ) && ! is_null( $row['to_fieldname'] ) ) {
 
@@ -986,9 +1031,9 @@ abstract class BBP_Converter_Base {
 										'slug'        => $insert_postmeta['slug']
 									) );
 								}
- 								break;
+								break;
 
-							/** Forum, Topic, Reply ***************************/
+							/** Forum, Topic, Reply, Comment ******************/
 
 							default:
 								$post_id = wp_insert_post( $insert_post );
@@ -1458,7 +1503,7 @@ function bbp_new_converter( $platform ) {
 	$found = false;
 
 	if ( $curdir = opendir( bbpress()->admin->admin_dir . 'converters/' ) ) {
-		while ( $file = readdir( $curdir ) ) {
+		while ( false !== ( $file = readdir( $curdir ) ) ) {
 			if ( stristr( $file, '.php' ) && stristr( $file, 'index' ) === FALSE ) {
 				$file = preg_replace( '/.php/', '', $file );
 				if ( $platform == $file ) {
