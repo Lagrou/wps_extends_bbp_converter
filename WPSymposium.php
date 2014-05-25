@@ -471,4 +471,27 @@ class WPSymposium extends BBP_Converter_Base {
 		}
 		return $status;
 	}
+
+	/**
+	 * This callback processes any custom parser.php attributes and custom code with preg_replace
+	 */
+	protected function callback_html( $field ) {
+
+		// Strips WP Symposium custom HTML first from $field before parsing $field to parser.php
+		$wps_markup = $field;
+		$wps_markup = html_entity_decode( $wps_markup );
+
+		// Replace '[youtube]$1[/youtube]' with 'https://youtu.be/$1"
+		$wps_markup = preg_replace( '/\[youtube\](.*?)\[\/youtube\]/', 'https://youtu.be/$1', $wps_markup );
+
+		// Now that WP Symposium custom HTML has been stripped put the cleaned HTML back in $field
+		$field = $wps_markup;
+
+		// Parse out any bbCodes in $field with the BBCode 'parser.php'
+		require_once( bbpress()->admin->admin_dir . 'parser.php' );
+		$bbcode = BBCode::getInstance();
+		$bbcode->enable_smileys = false;
+		$bbcode->smiley_regex   = false;
+		return html_entity_decode( $bbcode->Parse( $field ) );
+	}
 }
