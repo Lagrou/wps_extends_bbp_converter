@@ -29,6 +29,7 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_cats',
 			'from_fieldname'  => 'cid',
+			'from_expression' => 'ORDER BY symposium_cats.listorder',
 			'to_type'         => 'forum',
 			'to_fieldname'    => '_bbp_forum_id'
 		);
@@ -230,6 +231,7 @@ class WPSymposium extends BBP_Converter_Base {
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
 			'from_expression' => 'INNER JOIN wp_symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
+			'join_tablename'  => 'symposium_topics',
 			'to_type'         => 'reply',
 			'to_fieldname'    => '_bbp_post_id'
 		);
@@ -280,6 +282,98 @@ class WPSymposium extends BBP_Converter_Base {
 		);
 
 		// Reply dates.
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_started',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_date',
+			'callback_method' => 'callback_datetime'
+		);
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_started',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_date_gmt',
+			'callback_method' => 'callback_datetime'
+		);
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_started',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_modified',
+			'callback_method' => 'callback_datetime'
+		);
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_started',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_modified_gmt',
+			'callback_method' => 'callback_datetime'
+		);
+
+		/** Comment Section (second-level replies) ***************************/
+
+		// Comment id (Stored in postmeta)
+		/* Get only replies that have another reply as parent */
+/*		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'tid',
+			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent != 0',
+			'join_tablename'  => 'symposium_topics',
+			'to_type'         => 'reply',
+			'to_fieldname'    => '_bbp_post_id'
+		);
+
+		// Comment parent forum id (If no parent, then 0. Stored in postmeta)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_category',
+			'to_type'         => 'reply',
+			'to_fieldname'    => '_bbp_forum_id',
+			'callback_method' => 'callback_forumid'
+		);
+
+		// Comment parent topic id (If no parent, then 0. Stored in postmeta)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_parent',
+			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
+			'join_tablename'  => 'symposium_topics',
+			'to_type'         => 'reply',
+			'to_fieldname'    => '_bbp_topic_id',
+			'callback_method' => 'callback_topicid'
+		);
+
+		// Comment author.
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_owner',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_author',
+			'callback_method' => 'callback_userid'
+		);
+
+		// Comment content.
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_post',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_content',
+			'callback_method' => 'callback_html'
+		);
+
+		// Comment parent topic id (If no parent, then 0)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_topics',
+			'from_fieldname'  => 'topic_parent',
+			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
+			'join_tablename'  => 'symposium_topics',
+			'to_type'         => 'reply',
+			'to_fieldname'    => 'post_parent',
+			'callback_method' => 'callback_topicid'
+		);
+
+		// Comment dates.
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_started',
