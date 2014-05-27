@@ -842,7 +842,7 @@ abstract class BBP_Converter_Base {
 	 */
 	public function convert_table( $to_type, $start ) {
 
-		// Are we usig a sync table, or postmeta?
+		// Are we using a sync table, or postmeta?
 		if ( $this->wpdb->get_var( "SHOW TABLES LIKE '" . $this->sync_table_name . "'" ) == $this->sync_table_name ) {
 			$this->sync_table = true;
 		} else {
@@ -881,17 +881,24 @@ abstract class BBP_Converter_Base {
 			// Yay a match, and we have a from table, too
 			if ( ( $item['to_type'] == $to_type ) && !empty( $item['from_tablename'] ) ) {
 
-				// $from_tablename was set from a previous loop iteration
-				if ( ! empty( $from_tablename ) ) {
+				// $from_tablename needs to be set
+				if ( empty( $from_tablename ) ) {
+					$from_tablename = $item['from_tablename'] . ' AS ' . $item['from_tablename'];
+				}
 
-					// Doing some joining
-					if ( !in_array( $item['from_tablename'], $from_tables ) && in_array( $item['join_tablename'], $from_tables ) ) {
-						$from_tablename .= ' ' . $item['join_type'] . ' JOIN ' . $this->opdb->prefix . $item['from_tablename'] . ' AS ' . $item['from_tablename'] . ' ' . $item['join_expression'];
+				// Doing some joining
+				if ( !empty( $item['join_tablename'] ) ) {
+					if ( strpos( $item['join_tablename'], ' AS ' ) !== false ) {
+						$join_tablename_arr = explode( ' AS ', $item['join_tablename'] );
+						$join_tablename = $join_tablename_arr[0];
+						$join_alias = $join_tablename_arr[1];
+					} else {
+						$join_tablename = $join_alias = $item['join_tablename'];
 					}
 
-				// $from_tablename needs to be set
-				} else {
-					$from_tablename = $item['from_tablename'] . ' AS ' . $item['from_tablename'];
+					if ( !empty( $item['join_type'] ) && !empty( $item['join_expression'] ) ) {
+						$from_tablename .= ' ' . $item['join_type'] . ' JOIN ' . $this->opdb->prefix . $join_tablename . ' AS ' . $join_alias . ' ' . $item['join_expression'];
+					}
 				}
 
 				// Specific FROM expression data used
@@ -908,7 +915,7 @@ abstract class BBP_Converter_Base {
 				}
 
 				// Add tablename and fieldname to arrays, formatted for querying
-				$from_tables[] = $item['from_tablename'];
+				if ( !in_array( $item['from_tablename'], $from_tables ) ) $from_tables[] = $item['from_tablename'];
 				$field_list[]  = 'convert(' . $item['from_tablename'] . '.' . $item['from_fieldname'] . ' USING "' . $this->charset . '") AS ' . $item['from_fieldname'];
 			}
 		}
