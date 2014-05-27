@@ -229,7 +229,9 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'from_expression' => 'INNER JOIN wp_symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
+			'join_tablename'  => 'symposium_topics AS t',
+			'join_type'       => 'INNER',
+			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
 			'to_type'         => 'reply',
 			'to_fieldname'    => '_bbp_post_id'
 		);
@@ -316,8 +318,9 @@ class WPSymposium extends BBP_Converter_Base {
 /*		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent != 0',
-			'join_tablename'  => 'symposium_topics',
+			'join_tablename'  => 'symposium_topics AS t',
+			'join_type'       => 'INNER',
+			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent != 0',
 			'to_type'         => 'reply',
 			'to_fieldname'    => '_bbp_post_id'
 		);
@@ -335,8 +338,9 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_parent',
-			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
-			'join_tablename'  => 'symposium_topics',
+			'join_tablename'  => 'symposium_topics AS t',
+			'join_type'       => 'INNER',
+			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
 			'to_type'         => 'reply',
 			'to_fieldname'    => '_bbp_topic_id',
 			'callback_method' => 'callback_topicid'
@@ -364,8 +368,9 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_parent',
-			'from_expression' => 'INNER JOIN symposium_topics t ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
-			'join_tablename'  => 'symposium_topics',
+			'join_tablename'  => 'symposium_topics AS t',
+			'join_type'       => 'INNER',
+			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
 			'to_type'         => 'reply',
 			'to_fieldname'    => 'post_parent',
 			'callback_method' => 'callback_topicid'
