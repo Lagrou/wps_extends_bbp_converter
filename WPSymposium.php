@@ -314,14 +314,13 @@ class WPSymposium extends BBP_Converter_Base {
 		/** Comment Section (second-level replies) ***************************/
 
 		// Comment id (Stored in postmeta)
-		/* Get only replies that have another reply as parent */
-/*		$this->field_map[] = array(
+		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
 			'join_tablename'  => 'symposium_topics AS t',
 			'join_type'       => 'INNER',
 			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent != 0',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => '_bbp_post_id'
 		);
 
@@ -329,28 +328,25 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_category',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => '_bbp_forum_id',
 			'callback_method' => 'callback_forumid'
 		);
 
 		// Comment parent topic id (If no parent, then 0. Stored in postmeta)
 		$this->field_map[] = array(
-			'from_tablename'  => 'symposium_topics',
+			'from_tablename'  => 't',
 			'from_fieldname'  => 'topic_parent',
-			'join_tablename'  => 'symposium_topics AS t',
-			'join_type'       => 'INNER',
-			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => '_bbp_topic_id',
-			'callback_method' => 'callback_topicid'
+			'callback_method' => 'callback_replytoid_to_topicid'
 		);
 
 		// Comment author.
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_owner',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_author',
 			'callback_method' => 'callback_userid'
 		);
@@ -359,49 +355,55 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_post',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_content',
 			'callback_method' => 'callback_html'
 		);
 
 		// Comment parent topic id (If no parent, then 0)
 		$this->field_map[] = array(
+			'from_tablename'  => 't',
+			'from_fieldname'  => 'topic_parent',
+			'to_type'         => 'comment',
+			'to_fieldname'    => 'post_parent',
+			'callback_method' => 'callback_replytoid_to_topicid'
+		);
+
+		// Comment parent reply id (If no parent, then 0. Stored in postmeta)
+		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_parent',
-			'join_tablename'  => 'symposium_topics AS t',
-			'join_type'       => 'INNER',
-			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
-			'to_type'         => 'reply',
-			'to_fieldname'    => 'post_parent',
-			'callback_method' => 'callback_topicid'
+			'to_type'         => 'comment',
+			'to_fieldname'    => '_bbp_reply_to',
+			'callback_method' => 'callback_reply_to'
 		);
 
 		// Comment dates.
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_started',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_date',
 			'callback_method' => 'callback_datetime'
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_started',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_date_gmt',
 			'callback_method' => 'callback_datetime'
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_started',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_modified',
 			'callback_method' => 'callback_datetime'
 		);
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'topic_started',
-			'to_type'         => 'reply',
+			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_modified_gmt',
 			'callback_method' => 'callback_datetime'
 		);
@@ -567,6 +569,28 @@ class WPSymposium extends BBP_Converter_Base {
 				break;
 		}
 		return $status;
+	}
+
+	/**
+	 * Convert the WP Symposium secondary reply parent id to the topic id
+	 *
+	 * @param string $field
+	 * @return string
+	 */
+	protected function callback_replytoid_to_topicid( $field ) {
+		if ( !isset( $this->map_topicid[$field] ) ) {
+			if ( !empty( $this->sync_table ) ) {
+				$row = $this->wpdb->get_row( $this->wpdb->prepare( 'SELECT value_id, meta_value FROM ' . $this->sync_table_name . ' WHERE meta_key = "_bbp_old_topic_id" AND meta_value = "%s" LIMIT 1', $field ) );
+			} else {
+				$row = $this->wpdb->get_row( $this->wpdb->prepare( 'SELECT pm2.meta_value AS value_id FROM ' . $this->wpdb->postmeta . ' AS pm1 JOIN ' . $this->wpdb->postmeta . ' AS pm2 ON pm2.post_id = pm1.post_id AND pm2.meta_key = "_bbp_topic_id" WHERE pm1.meta_key = "_bbp_post_id" AND pm1.meta_value = "%s" LIMIT 1', $field ) );
+			}
+			if ( !is_null( $row ) ) {
+				$this->map_topicid[$field] = $row->value_id;
+			} else {
+				$this->map_topicid[$field] = 0;
+			}
+		}
+		return $this->map_topicid[$field];
 	}
 
 	/**
