@@ -850,9 +850,8 @@ abstract class BBP_Converter_Base {
 		}
 
 		// Set some defaults
-		$has_insert     = false;
-		$from_tablename = '';
-		$field_list     = $from_tables = $tablefield_array = array();
+		$has_insert = false;
+		$field_list = $tablefield_array = array();
 
 		// Toggle Table Name based on $to_type (destination)
 		switch ( $to_type ) {
@@ -878,210 +877,191 @@ abstract class BBP_Converter_Base {
 		// Loop through the field maps, and look for to_type matches
 		foreach ( $this->field_map as $item ) {
 
-			// Yay a match, and we have a from table, too
-			if ( ( $item['to_type'] == $to_type ) && !empty( $item['from_tablename'] ) ) {
+			// Yay a match
+			if ( $item['to_type'] == $to_type ) {
+			
+				// We have the mandatory fields to build the $from_query
+				$from_query = '';
+				if ( !empty( $item['from_tablename'] ) && !empty( $item['from_fieldname'] ) ) {
+					
+					// Needs from_tablename
+					$from_table_as = ( !empty( $item['from_table_as'] ) ) ? $item['from_table_as'] : $item['from_tablename'];
+					$from_query = $item['from_tablename'] . ' AS ' . $from_table_as;
+					
+					// Set the $from_fieldname for this item
+					$from_fieldname = 'convert(' . $from_table_as . '.' . $item['from_fieldname'] . ' USING "' . $this->charset . '") AS ' . $item['from_fieldname'];
 
-				// $from_tablename needs to be set
-				if ( empty( $from_tablename ) ) {
-					$from_tablename = $item['from_tablename'] . ' AS ' . $item['from_tablename'];
-				}
-
-				// Doing some joining
-				if ( !empty( $item['join_tablename'] ) ) {
-					if ( strpos( $item['join_tablename'], ' AS ' ) !== false ) {
-						$join_tablename_arr = explode( ' AS ', $item['join_tablename'] );
-						$join_tablename = $join_tablename_arr[0];
-						$join_alias = $join_tablename_arr[1];
-					} else {
-						$join_tablename = $join_alias = $item['join_tablename'];
+					// Doing some joining
+					if ( !empty( $item['join_type'] ) && !empty( $item['join_tablename'] ) && !empty( $item['join_expression'] ) ) {
+						$join_table_as = ( !empty( $item['join_table_as'] ) ) ? $item['join_table_as'] : $item['join_tablename'];
+						$from_query .= ' ' . $item['join_type'] . ' JOIN ' . $this->opdb->prefix . $item['join_tablename'] . ' AS ' . $join_table_as . ' ' . $item['join_expression'];
 					}
-
-					if ( !empty( $item['join_type'] ) && !empty( $item['join_expression'] ) ) {
-						$from_tablename .= ' ' . $item['join_type'] . ' JOIN ' . $this->opdb->prefix . $join_tablename . ' AS ' . $join_alias . ' ' . $item['join_expression'];
-					}
-				}
-
-				// Specific FROM expression data used
-				if ( !empty( $item['from_expression'] ) ) {
-
-					// No 'WHERE' in expression
-					if ( stripos( $from_tablename, "WHERE" ) === false ) {
-						$from_tablename .= ' ' . $item['from_expression'];
-
-					// 'WHERE' in expression, so replace with 'AND'
-					} else {
-						$from_tablename .= ' ' . str_replace( "WHERE", "AND", $item['from_expression'] );
+					
+					// Specific FROM expression data used
+					if ( !empty( $item['from_expression'] ) ) {
+						$from_query .= ' ' . $item['from_expression'];
 					}
 				}
 
-				// Add tablename and fieldname to arrays, formatted for querying
-				if ( !in_array( $item['from_tablename'], $from_tables ) ) $from_tables[] = $item['from_tablename'];
-				$field_list[]  = 'convert(' . $item['from_tablename'] . '.' . $item['from_fieldname'] . ' USING "' . $this->charset . '") AS ' . $item['from_fieldname'];
-			}
-		}
+				/** Step 2 ************************************************************/
 
-		/** Step 2 ************************************************************/
+				// We have a $from_query, so we want to get some data to convert
+				if ( !empty( $from_query ) ) {
 
-		// We have a $from_tablename, so we want to get some data to convert
-		if ( !empty( $from_tablename ) ) {
+					// Get some data from the old forums
+					$forum_query = 'SELECT ' . $from_fieldname . ' FROM ' . $this->opdb->prefix . $from_query . ' LIMIT ' . $start . ', ' . $this->max_rows;
+					$forum_array = $this->opdb->get_results( $forum_query, ARRAY_A );
 
-			// Get some data from the old forums
-			$field_list  = array_unique( $field_list );
-			$forum_query = 'SELECT ' . implode( ',', $field_list ) . ' FROM ' . $this->opdb->prefix . $from_tablename . ' LIMIT ' . $start . ', ' . $this->max_rows;
-			$forum_array = $this->opdb->get_results( $forum_query, ARRAY_A );
+					// Set this query as the last one ran
+					update_option( '_bbp_converter_query', $forum_query );
+					// Potential impacts here ?
 
-			// Set this query as the last one ran
-			update_option( '_bbp_converter_query', $forum_query );
+					// Query returned some results
+					if ( !empty( $forum_array ) ) {
 
-			// Query returned some results
-			if ( !empty( $forum_array ) ) {
+						// Loop through results
+						foreach ( (array) $forum_array as $forum ) {
 
-				// Loop through results
-				foreach ( (array) $forum_array as $forum ) {
+							// Reset some defaults
+							$insert_post = $insert_postmeta = $insert_data = array();
 
-					// Reset some defaults
-					$insert_post = $insert_postmeta = $insert_data = array();
+							// to_fieldname is present. This means we have some work to do here.
+							if ( !is_null( $item['to_fieldname'] ) ) {
 
-					// Loop through field map, again...
-					foreach ( $this->field_map as $row ) {
+								// This item has a destination that matches one of the
+								// columns in this table.
+								if ( in_array( $item['to_fieldname'], $tablefield_array ) ) {
 
-						// Types match and to_fieldname is present. This means
-						// we have some work to do here.
-						if ( ( $row['to_type'] == $to_type ) && ! is_null( $row['to_fieldname'] ) ) {
+									// Allows us to set default fields.
+									if ( isset( $item['default'] ) ) {
+										$insert_post[$item['to_fieldname']] = $item['default'];
 
-							// This row has a destination that matches one of the
-							// columns in this table.
-							if ( in_array( $row['to_fieldname'], $tablefield_array ) ) {
+									// Translates a field from the old forum.
+									} elseif ( isset( $item['callback_method'] ) ) {
+										if ( ( 'callback_userid' == $item['callback_method'] ) && empty( $_POST['_bbp_converter_convert_users'] ) ) {
+											$insert_post[$item['to_fieldname']] = $forum[$item['from_fieldname']];
+										} else {
+											$insert_post[$item['to_fieldname']] = call_user_func_array( array( $this, $item['callback_method'] ), array( $forum[$item['from_fieldname']], $forum ) );
+										}
 
-								// Allows us to set default fields.
-								if ( isset( $row['default'] ) ) {
-									$insert_post[$row['to_fieldname']] = $row['default'];
-
-								// Translates a field from the old forum.
-								} elseif ( isset( $row['callback_method'] ) ) {
-									if ( ( 'callback_userid' == $row['callback_method'] ) && empty( $_POST['_bbp_converter_convert_users'] ) ) {
-										$insert_post[$row['to_fieldname']] = $forum[$row['from_fieldname']];
+									// Maps the field from the old forum.
 									} else {
-										$insert_post[$row['to_fieldname']] = call_user_func_array( array( $this, $row['callback_method'] ), array( $forum[$row['from_fieldname']], $forum ) );
+										$insert_post[$item['to_fieldname']] = $forum[$item['from_fieldname']];
 									}
 
-								// Maps the field from the old forum.
-								} else {
-									$insert_post[$row['to_fieldname']] = $forum[$row['from_fieldname']];
-								}
+								// Destination field is not empty, so we might need
+								// to do some extra work or set a default.
+								} elseif ( !empty( $item['to_fieldname'] ) ) {
 
-							// Destination field is not empty, so we might need
-							// to do some extra work or set a default.
-							} elseif ( !empty( $row['to_fieldname'] ) ) {
+									// Allows us to set default fields.
+									if ( isset( $item['default'] ) ) {
+										$insert_postmeta[$item['to_fieldname']] = $item['default'];
 
-								// Allows us to set default fields.
-								if ( isset( $row['default'] ) ) {
-									$insert_postmeta[$row['to_fieldname']] = $row['default'];
+									// Translates a field from the old forum.
+									} elseif ( isset( $item['callback_method'] ) ) {
+										if ( ( $item['callback_method'] == 'callback_userid' ) && ( 0 == $_POST['_bbp_converter_convert_users'] ) ) {
+											$insert_postmeta[$item['to_fieldname']] = $forum[$item['from_fieldname']];
+										} else {
+											$insert_postmeta[$item['to_fieldname']] = call_user_func_array( array( $this, $item['callback_method'] ), array( $forum[$item['from_fieldname']], $forum ) );
+										}
 
-								// Translates a field from the old forum.
-								} elseif ( isset( $row['callback_method'] ) ) {
-									if ( ( $row['callback_method'] == 'callback_userid' ) && ( 0 == $_POST['_bbp_converter_convert_users'] ) ) {
-										$insert_postmeta[$row['to_fieldname']] = $forum[$row['from_fieldname']];
+									// Maps the field from the old forum.
 									} else {
-										$insert_postmeta[$row['to_fieldname']] = call_user_func_array( array( $this, $row['callback_method'] ), array( $forum[$row['from_fieldname']], $forum ) );
+										$insert_postmeta[$item['to_fieldname']] = $forum[$item['from_fieldname']];
 									}
-
-								// Maps the field from the old forum.
-								} else {
-									$insert_postmeta[$row['to_fieldname']] = $forum[$row['from_fieldname']];
 								}
 							}
-						}
-					}
 
-					/** Step 3 ************************************************/
+							/** Step 3 ************************************************/
 
-					// Something to insert into the destination field
-					if ( count( $insert_post ) > 0 || ( $to_type == 'tags' && count( $insert_postmeta ) > 0 ) ) {
+							// Something to insert into the destination field
+							if ( count( $insert_post ) > 0 || ( $to_type == 'tags' && count( $insert_postmeta ) > 0 ) ) {
 
-						switch ( $to_type ) {
+								switch ( $to_type ) {
 
-							/** New user **************************************/
+									/** New user **************************************/
 
-							case 'user':
-								if ( username_exists( $insert_post['user_login'] ) ) {
-									$insert_post['user_login'] = 'imported_' . $insert_post['user_login'];
-								}
-
-								if ( email_exists( $insert_post['user_email'] ) ) {
-									$insert_post['user_email'] = 'imported_' . $insert_post['user_email'];
-								}
-
-								$post_id = wp_insert_user( $insert_post );
-
-								if ( is_numeric( $post_id ) ) {
-
-									foreach ( $insert_postmeta as $key => $value ) {
-
-										add_user_meta( $post_id, $key, $value, true );
-
-										if ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
-											$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'user', 'value_id' => $post_id, 'meta_key' => $key, 'meta_value' => $value ) );
+									case 'user':
+										if ( username_exists( $insert_post['user_login'] ) ) {
+											$insert_post['user_login'] = 'imported_' . $insert_post['user_login'];
 										}
-									}
-								}
-								break;
 
-							/** New Topic-Tag *********************************/
+										if ( email_exists( $insert_post['user_email'] ) ) {
+											$insert_post['user_email'] = 'imported_' . $insert_post['user_email'];
+										}
 
-							case 'tags':
-								$post_id = wp_set_object_terms( $insert_postmeta['objectid'], $insert_postmeta['name'], 'topic-tag', true );
-								$term = get_term_by( 'name', $insert_postmeta['name'], 'topic-tag');
-								if ( false !== $term ) {
-									wp_update_term( $term->term_id, 'topic-tag', array(
-										'description' => $insert_postmeta['description'],
-										'slug'        => $insert_postmeta['slug']
-									) );
-								}
-								break;
+										$post_id = wp_insert_user( $insert_post );
 
-							/** Forum, Topic, Reply, Comment ******************/
+										if ( is_numeric( $post_id ) ) {
 
-							default:
-								$post_id = wp_insert_post( $insert_post );
+											foreach ( $insert_postmeta as $key => $value ) {
 
-								if ( is_numeric( $post_id ) ) {
+												add_user_meta( $post_id, $key, $value, true );
 
-									foreach ( $insert_postmeta as $key => $value ) {
-
-										add_post_meta( $post_id, $key, $value, true );
-
-										// Forums need to save their old ID for group forum association
-										if ( ( 'forum' == $to_type ) && ( '_bbp_forum_id' == $key ) )
-											add_post_meta( $post_id, '_bbp_old_forum_id', $value );
-
-										// Topics need an extra bit of metadata
-										// to be keyed to the new post_id
-										if ( ( 'topic' == $to_type ) && ( '_bbp_topic_id' == $key ) ) {
-
-											// Update the live topic ID
-											update_post_meta( $post_id, $key, $post_id );
-
-											// Save the old topic ID
-											add_post_meta( $post_id, '_bbp_old_topic_id', $value );
-											if ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
-												$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => '_bbp_topic_id',     'meta_value' => $post_id ) );
-												$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => '_bbp_old_topic_id', 'meta_value' => $value   ) );
+												if ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
+													$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'user', 'value_id' => $post_id, 'meta_key' => $key, 'meta_value' => $value ) );
+												}
 											}
-
-										} elseif ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
-											$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => $key, 'meta_value' => $value ) );
 										}
+										break;
 
-										// Replies need to save their old reply_to ID for hierarchical replies association
-										if ( ( 'reply' == $to_type ) && ( '_bbp_reply_to' == $key ) ) {
-											add_post_meta( $post_id, '_bbp_old_reply_to', $value );
+									/** New Topic-Tag *********************************/
+
+									case 'tags':
+										$post_id = wp_set_object_terms( $insert_postmeta['objectid'], $insert_postmeta['name'], 'topic-tag', true );
+										$term = get_term_by( 'name', $insert_postmeta['name'], 'topic-tag');
+										if ( false !== $term ) {
+											wp_update_term( $term->term_id, 'topic-tag', array(
+												'description' => $insert_postmeta['description'],
+												'slug'        => $insert_postmeta['slug']
+											) );
 										}
-									}
+										break;
+
+									/** Forum, Topic, Reply, Comment ******************/
+
+									default:
+										$post_id = wp_insert_post( $insert_post );
+
+										if ( is_numeric( $post_id ) ) {
+
+											foreach ( $insert_postmeta as $key => $value ) {
+
+												add_post_meta( $post_id, $key, $value, true );
+
+												// Forums need to save their old ID for group forum association
+												if ( ( 'forum' == $to_type ) && ( '_bbp_forum_id' == $key ) )
+													add_post_meta( $post_id, '_bbp_old_forum_id', $value );
+
+												// Topics need an extra bit of metadata
+												// to be keyed to the new post_id
+												if ( ( 'topic' == $to_type ) && ( '_bbp_topic_id' == $key ) ) {
+
+													// Update the live topic ID
+													update_post_meta( $post_id, $key, $post_id );
+
+													// Save the old topic ID
+													add_post_meta( $post_id, '_bbp_old_topic_id', $value );
+													if ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
+														$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => '_bbp_topic_id',     'meta_value' => $post_id ) );
+														$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => '_bbp_old_topic_id', 'meta_value' => $value   ) );
+													}
+
+												} elseif ( '_id' == substr( $key, -3 ) && ( true === $this->sync_table ) ) {
+													$this->wpdb->insert( $this->sync_table_name, array( 'value_type' => 'post', 'value_id' => $post_id, 'meta_key' => $key, 'meta_value' => $value ) );
+												}
+
+												// Replies need to save their old reply_to ID for hierarchical replies association
+												if ( ( 'reply' == $to_type ) && ( '_bbp_reply_to' == $key ) ) {
+													add_post_meta( $post_id, '_bbp_old_reply_to', $value );
+												}
+											}
+										}
+										break;
 								}
-								break;
+								$has_insert = true;
+							}
 						}
-						$has_insert = true;
 					}
 				}
 			}
