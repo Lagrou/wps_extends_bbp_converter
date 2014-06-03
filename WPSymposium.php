@@ -54,7 +54,7 @@ class WPSymposium extends BBP_Converter_Base {
 			'from_tablename'  => 'symposium_cats',
 			'from_fieldname'  => 'stub',
 			'to_type'         => 'forum',
-			'to_fieldname'    => 'post_name',
+			'to_fieldname'    => 'post_name'
 		);
 
 		// Forum description.
@@ -62,7 +62,7 @@ class WPSymposium extends BBP_Converter_Base {
 			'from_tablename'  => 'symposium_cats',
 			'from_fieldname'  => 'cat_desc',
 			'to_type'         => 'forum',
-			'to_fieldname'    => 'post_content',
+			'to_fieldname'    => 'post_content'
 		);
 
 		// Forum status (Open or Closed)
@@ -83,6 +83,92 @@ class WPSymposium extends BBP_Converter_Base {
 		);
 
 		// Forum dates.
+		$this->field_map[] = array(
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_date',
+			'default' => date('Y-m-d H:i:s')
+		);
+		$this->field_map[] = array(
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_date_gmt',
+			'default' => date('Y-m-d H:i:s')
+		);
+		$this->field_map[] = array(
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_modified',
+			'default' => date('Y-m-d H:i:s')
+		);
+		$this->field_map[] = array(
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_modified_gmt',
+			'default' => date('Y-m-d H:i:s')
+		);
+
+		/** Group Forum Section ***********************************************/
+/*
+		// Group Forum id (Stored in postmeta)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_groups',
+			'from_fieldname'  => 'gid',
+			'to_type'         => 'forum',
+			'to_fieldname'    => '_bbp_forum_id'
+		);
+		
+		// Groups forums have no parent cat
+		// Group Forum parent id (If no parent, then 0. Stored in postmeta)
+		// $this->field_map[] = array(
+			// 'from_tablename'  => 'symposium_groups',
+			// 'from_fieldname'  => 'cat_parent',
+			// 'to_type'         => 'forum',
+			// 'to_fieldname'    => '_bbp_forum_parent_id'
+		// );
+
+		// Group Forum title.
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_groups',
+			'from_fieldname'  => 'name',
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_title'
+		);
+
+		// Group Forum slug (Clean name to avoid confilcts)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_groups',
+			'from_fieldname'  => 'name',
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_name',
+			'callback_method' => 'callback_forum_slug'
+		);
+
+		// Group Forum description.
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_groups',
+			'from_fieldname'  => 'description',
+			'to_type'         => 'forum',
+			'to_fieldname'    => 'post_content'
+		);
+
+		// Group Forum status (Open or Closed)
+		$this->field_map[] = array(
+			'from_tablename'  => 'symposium_groups',
+			'from_fieldname'  => 'allow_new_topics',
+			'to_type'         => 'forum',
+			'to_fieldname'    => '_bbp_status',
+			'callback_method' => 'callback_forum_status'
+		);
+		
+		// Groups Forums have no order (one forum per group)
+		// Group Forum display order (Starts from 1)
+		// $this->field_map[] = array(
+			// 'from_tablename'  => 'symposium_groups',
+			// 'from_fieldname'  => 'listorder',
+			// 'to_type'         => 'forum',
+			// 'to_fieldname'    => 'menu_order'
+		// );
+		
+		// Also TODO: mark as private / hidden
+
+		// Group Forum dates.
 		$this->field_map[] = array(
 			'to_type'         => 'forum',
 			'to_fieldname'    => 'post_date',
@@ -229,7 +315,8 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'join_tablename'  => 'symposium_topics AS t',
+			'join_tablename'  => 'symposium_topics',
+			'join_table_as'   => 't',
 			'join_type'       => 'INNER',
 			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent = 0',
 			'to_type'         => 'reply',
@@ -317,7 +404,8 @@ class WPSymposium extends BBP_Converter_Base {
 		$this->field_map[] = array(
 			'from_tablename'  => 'symposium_topics',
 			'from_fieldname'  => 'tid',
-			'join_tablename'  => 'symposium_topics AS t',
+			'join_tablename'  => 'symposium_topics',
+			'join_table_as'   => 't',
 			'join_type'       => 'INNER',
 			'join_expression' => 'ON symposium_topics.topic_parent = t.tid WHERE symposium_topics.topic_parent != 0 AND symposium_topics.topic_group = 0 AND t.topic_parent != 0',
 			'to_type'         => 'comment',
@@ -335,7 +423,8 @@ class WPSymposium extends BBP_Converter_Base {
 
 		// Comment parent topic id (If no parent, then 0. Stored in postmeta)
 		$this->field_map[] = array(
-			'from_tablename'  => 't',
+			'from_tablename'  => 'symposium_topics',
+			'from_table_as'   => 't',
 			'from_fieldname'  => 'topic_parent',
 			'to_type'         => 'comment',
 			'to_fieldname'    => '_bbp_topic_id',
@@ -362,7 +451,8 @@ class WPSymposium extends BBP_Converter_Base {
 
 		// Comment parent topic id (If no parent, then 0)
 		$this->field_map[] = array(
-			'from_tablename'  => 't',
+			'from_tablename'  => 'symposium_topics',
+			'from_table_as'   => 't',
 			'from_fieldname'  => 'topic_parent',
 			'to_type'         => 'comment',
 			'to_fieldname'    => 'post_parent',
